@@ -185,7 +185,7 @@ def get_vacancy(vac_id):
 
 def check_keyword(keyword,vac):
     """
-    Проверка наличия слова в теле факансии
+    Проверка наличия слова в теле вакансии
     """
     kw = keyword.lower()
     if kw not in vac['name'].lower() and kw not in vac['advanced']['description'].lower():

@@ -157,7 +157,7 @@ def start_negotiate(vac_id, resume_id='16959caaff099e17fc0039ed1f364437586257',m
     if os.path.exists('message') and msg=='':
         with open('message','r',encoding='utf-8') as f:
             msg = f.read()
-            msg.replace('%greeting%', greeting())
+            msg = msg.replace('%greeting%', greeting())
     headers = {
         'Content-Type': 'multipart/form-data',
         'user-agent': user_agent,

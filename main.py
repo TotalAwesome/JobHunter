@@ -1,7 +1,6 @@
 
 import requests
 import time
-import requests
 import colorama
 import webbrowser
 import os
@@ -123,32 +122,32 @@ def update_config(json_data):
     json.dump(config, open('config.json', 'w'))
 
 def get_json(url):
-    try:
         while True:
-            if 'access_token' not in config:
-                result = requests.get(url).json()
-            else:
-                if config['expires_in'] < int(time.time()):
-                    refresh_token()
-                headers = {
-                    'user-agent': user_agent,
-                    'Authorization':f'Bearer {config["access_token"]}'
-                }
-                result = requests.get(url,headers=headers).json()
+            try:
+                if 'access_token' not in config:
+                    result = requests.get(url).json()
+                else:
+                    if config['expires_in'] < int(time.time()):
+                        refresh_token()
+                    headers = {
+                        'user-agent': user_agent,
+                        'Authorization':f'Bearer {config["access_token"]}'
+                    }
+                    result = requests.get(url,headers=headers).json()
 
-            if 'errors' not in result:
-                return result
-            else:
-                print(result['errors'][0]['value'])
-                if result['errors'][0]['value'] == 'captcha_required':
-                    print(result['errors'][0]['captcha_url'])
-                    print(requests.get(
-                        result['errors'][0]['captcha_url']).text)
-                time.sleep(10)
+                if 'errors' not in result:
+                    return result
+                else:
+                    print(result['errors'][0]['value'])
+                    if result['errors'][0]['value'] == 'captcha_required':
+                        print(result['errors'][0]['captcha_url'])
+                        print(requests.get(
+                            result['errors'][0]['captcha_url']).text)
+                    time.sleep(10)
 
-    except Exception as e:
-        print('Get json error: ', e)
-        return {}
+            except Exception as e:
+                print('Get json error: ', e)
+                return {}
 
 def start_negotiate(vac_id, resume_id='16959caaff099e17fc0039ed1f364437586257',msg=''):
     """
@@ -234,16 +233,16 @@ def get_vacancies(text='', area=[]):
                 vac_list[i]['rank'] = '/'.join([k for k,v in rank.items() if v])
             published = parser.parse(vac['published_at']).timestamp()
             # Вакансия свежая, отправляем отклик и пишем в базу
-            positive = start_negotiate(vac['id'])
-            if positive:
-                db.add_vacancy(
-                    (
-                        vac['id'],
-                        vac['employer']['id'],
-                        int(published),
-                        vac_list[i]['rank'] 
-                    )
+            if 'qa' not in vac['name'].lower().split() and not rank['Senior']:
+                start_negotiate(vac['id'])
+            db.add_vacancy(
+                (
+                    vac['id'],
+                    vac['employer']['id'],
+                    int(published),
+                    vac_list[i]['rank'] 
                 )
+            )
 
 def main():
     while True:
@@ -261,7 +260,6 @@ if all(
     'client_secret' in config
     )
 ):
-    # main()
     try:
         main()
     except Exception as e:
